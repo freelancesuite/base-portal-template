@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreelanceSuite - Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: #2c3e50; margin-top: 0; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background-color: #2980b9; }
+        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .hidden { display: none; }
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
+        .unpaid { background-color: #f1c40f; color: #fff; }
+        .pending { background-color: #e67e22; color: #fff; }
+        .paid { background-color: #2ecc71; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="admin-view" class="container hidden">
+        <h2>🚀 Freelancer Dashboard</h2>
+        <p>Gumawa ng bagong invoice para sa iyong client.</p>
+        <hr><br>
+        <div class="form-group">
+            <label>Invoice ID:</label>
+            <input type="text" id="inv-id" placeholder="e.g., INV-2026-001">
+        </div>
+        <div class="form-group">
+            <label>Client Name:</label>
+            <input type="text" id="inv-client" placeholder="Pangalan ng Client">
+        </div>
+        <div class="form-group">
+            <label>Amount (PHP):</label>
+            <input type="number" id="inv-amount" placeholder="0.00">
+        </div>
+        <div class="form-group">
+            <label>Project File Link (Google Drive):</label>
+            <input type="text" id="inv-file" placeholder="I-paste ang link ng final deliverable zip file">
+        </div>
+        <button class="btn" onclick="createInvoice()">Generate & Save Invoice</button>
+    </div>
+
+    <div id="client-view" class="container hidden">
+        <h2>💼 Client Payment Portal</h2>
+        <p>Project Invoice details and secured file delivery.</p>
+        <hr><br>
+        <table style="width:100%; margin-bottom: 20px; text-align: left;">
+            <tr><th>Invoice ID:</th><td id="display-id">-</td></tr>
+            <tr><th>Client Name:</th><td id="display-client">-</td></tr>
+            <tr><th>Amount Due:</th><td id="display-amount">0.00 PHP</td></tr>
+            <tr><th>Status:</th><td><span id="display-status" class="status-badge unpaid">Unpaid</span></td></tr>
+        </table>
+
+        <div id="upload-section">
+            <p style="font-size: 14px; color: #7f8c8d;">Paki-upload ang screenshot ng iyong GCash/Bank transfer proof of payment para ma-unlock ang files:</p>
+            <div class="form-group">
+                <input type="file" id="receipt-file" accept="image/*">
+            </div>
+            <button class="btn" onclick="submitReceipt()">Submit Proof of Payment</button>
+        </div>
+
+        <br>
+        <button class="btn paid" id="download-btn" onclick="downloadDeliverable()" disabled>
+            🎁 Download Project Files (.zip)
+        </button>
+    </div>
+
+    <script>
+        // Palitan mo ito ng totoong Web App URL ng Google Apps Script ng bawat freelancer mamaya
+        const APPS_SCRIPT_URL = "YOUR_FREELANCER_SPECIFIC_APPS_SCRIPT_URL";
+
+        // Basahin ang URL parameters (?admin=true o ?invoice=INV-001)
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin');
+        const invoiceId = urlParams.get('invoice');
+
+        // Router Logic
+        if (isAdmin === 'true') {
+            document.getElementById('admin-view').classList.remove('hidden');
+        } else if (invoiceId) {
+            document.getElementById('client-view').classList.remove('hidden');
+            loadInvoiceDetails(invoiceId);
+        } else {
+            document.body.innerHTML = "<h2 style='text-align:center; margin-top:100px;'>404 - Portal Not Found</h2>";
+        }
+
+        // 1. ADMIN FUNCTION: Gumawa ng Invoice
+        function createInvoice() {
+            const id = document.getElementById('inv-id').value;
+            const client = document.getElementById('inv-client').value;
+            const amount = document.getElementById('inv-amount').value;
+            const fileLink = document.getElementById('inv-file').value;
+
+            if(!id || !client || !amount || !fileLink) return alert("Paki-puno lahat ng fields!");
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Para sa Apps Script cross-origin
+                body: JSON.stringify({
+                    action: 'createInvoice',
+                    id: id,
+                    client: client,
+                    amount: amount,
+                    fileLink: fileLink
+                })
+            }).then(() => {
+                alert("Invoice Successfully Generated sa Google Sheet! Pwede mo na isend ang link sa client.");
+                // Mag-ge-generate ng client link para makopya ni freelancer
+                const clientLink = window.location.origin + window.location.pathname + "?invoice=" + id;
+                prompt("Kopyahin ang link na ito at isend kay client:", clientLink);
+            });
+        }
+
+        // 2. CLIENT FUNCTION: I-load ang Invoice Data mula sa Google Sheet
+        function loadInvoiceDetails(id) {
+            fetch(`${APPS_SCRIPT_URL}?action=getInvoice&id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.error) {
+                        alert("Invoice not found!");
+                        return;
+                    }
+                    document.getElementById('display-id').innerText = data.id;
+                    document.getElementById('display-client').innerText = data.client;
+                    document.getElementById('display-amount').innerText = data.amount + " PHP";
+                    
+                    const statusEl = document.getElementById('display-status');
+                    statusEl.innerText = data.status;
+                    statusEl.className = "status-badge " + data.status.toLowerCase().replace(" ", "-");
+
+                    // Kung PAID na, i-enable ang download button at itago ang upload section
+                    if(data.status.toUpperCase() === "PAID") {
+                        document.getElementById('download-btn').disabled = false;
+                        document.getElementById('upload-section').classList.add('hidden');
+                    }
+                });
+        }
+
+        // 3. CLIENT FUNCTION: Mag-upload ng Resibo
+        function submitReceipt() {
+            const fileInput = document.getElementById('receipt-file');
+            if(fileInput.files.length === 0) return alert("Pili muna ng larawan ng resibo!");
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result.split(',')[1];
+                
+                fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: 'uploadReceipt',
+                        id: invoiceId,
+                        fileName: file.name,
+                        fileData: base64Data
+                    })
+                }).then(() => {
+                    alert("Resibo na-upload na! Pakihintay na i-verify ng freelancer para ma-unlock ang file.");
+                    location.reload();
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 4. CLIENT FUNCTION: I-download ang file kung Paid na
+        function downloadDeliverable() {
+            // Humingi ng secure download link sa Google Apps Script
+            fetch(`${APPS_SCRIPT_URL}?action=downloadFile&id=${invoiceId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.downloadUrl) {
+                        window.open(data.downloadUrl, '_blank');
+                    } else {
+                        alert("Hindi pa aprubado ang iyong bayad.");
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
