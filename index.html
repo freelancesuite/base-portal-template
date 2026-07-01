@@ -39,11 +39,12 @@
             <label>Amount (PHP):</label>
             <input type="number" id="inv-amount" placeholder="0.00">
         </div>
-        <div class="form-group">
-            <label>Project File Link (Google Drive):</label>
-            <input type="text" id="inv-file" placeholder="I-paste ang link ng final deliverable zip file">
+       <div class="form-group">
+            <label>Upload File:</label>
+            <input type="file" id="work-file">
         </div>
-        <button class="btn" onclick="createInvoice()">Generate & Save Invoice</button>
+        <button class="btn" style="background-color: #27ae60;" onclick="handleFileUpload()">🚀 Upload to Drive</button>
+              
     </div>
 
     <div id="client-view" class="container hidden">
@@ -91,6 +92,44 @@ if (invoiceId) {
     document.getElementById('admin-view').classList.remove('hidden');
 }
 
+        function handleFileUpload() {
+    const clientName = document.getElementById('upload-client').value;
+    const fileInput = document.getElementById('work-file');
+    const repoName = "vergeltest4"; // Pwede mong gawing dynamic ito base sa URL o config
+
+    if (!clientName || fileInput.files.length === 0) return alert("Punan ang client name at pumili ng file!");
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        const base64 = e.target.result.split(',')[1];
+        
+        // I-show na nag-uupload tayo para alam ng freelancer
+        alert("Nag-uupload na... antayin ang confirmation.");
+
+        fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                repoName: repoName,
+                clientName: clientName,
+                fileName: file.name,
+                fileData: base64,
+                mimeType: file.type
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                alert("Boom! Success ang upload. File URL: " + data.url);
+                // Dito mo rin pwedeng tawagin yung pag-update sa GSheet database
+            } else {
+                alert("Error: " + data.message);
+            }
+        });
+    };
+    reader.readAsDataURL(file);
+}
         // 1. ADMIN FUNCTION: Gumawa ng Invoice
         function createInvoice() {
             const id = document.getElementById('inv-id').value;
