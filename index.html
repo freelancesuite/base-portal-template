@@ -32,9 +32,9 @@
             <input type="text" id="inv-id" placeholder="e.g., INV-2026-001">
         </div>
         <div class="form-group">
-            <label>Client Name:</label>
-            <input type="text" id="inv-client" placeholder="Pangalan ng Client">
-        </div>
+        <label>Client Name:</label>
+                <input type="text" id="upload-client" placeholder="Pangalan ng Client">
+            </div>
         <div class="form-group">
             <label>Amount (PHP):</label>
             <input type="number" id="inv-amount" placeholder="0.00">
@@ -92,24 +92,35 @@ if (invoiceId) {
     document.getElementById('admin-view').classList.remove('hidden');
 }
 
-        function handleFileUpload() {
-    const clientName = document.getElementById('upload-client').value;
+    function handleFileUpload() {
+    const clientInput = document.getElementById('upload-client');
+    
+    // Safety check: I-check kung null ba talaga
+    if (!clientInput) {
+        alert("Error: Hindi mahanap ang Client Name field! Paki-refresh ang page.");
+        return;
+    }
+    
+    const clientName = clientInput.value; // Dito na siya kukuha
     const fileInput = document.getElementById('work-file');
-    const repoName = "vergeltest4"; // Pwede mong gawing dynamic ito base sa URL o config
+    const repoName = "vergeltest4";
 
-    if (!clientName || fileInput.files.length === 0) return alert("Punan ang client name at pumili ng file!");
+    if (!clientName || fileInput.files.length === 0) {
+        alert("Punan ang client name at pumili ng file!");
+        return;
+    }
 
     const file = fileInput.files[0];
     const reader = new FileReader();
 
     reader.onload = function(e) {
         const base64 = e.target.result.split(',')[1];
-        
-        // I-show na nag-uupload tayo para alam ng freelancer
         alert("Nag-uupload na... antayin ang confirmation.");
 
         fetch(APPS_SCRIPT_URL, {
             method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 repoName: repoName,
                 clientName: clientName,
@@ -118,14 +129,17 @@ if (invoiceId) {
                 mimeType: file.type
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if(data.status === "success") {
-                alert("Boom! Success ang upload. File URL: " + data.url);
-                // Dito mo rin pwedeng tawagin yung pag-update sa GSheet database
-            } else {
-                alert("Error: " + data.message);
-            }
+        // Sa loob ng handleFileUpload (yung .then part)
+            .then(data => {
+                if(data.status === "success") {
+                    alert("Boom! Success: " + data.msg);
+                } else {
+                    alert("Server Error: " + data.message);
+                }
+            })
+        .catch(err => {
+            console.error(err);
+            alert("Error: " + err);
         });
     };
     reader.readAsDataURL(file);
