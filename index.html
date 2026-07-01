@@ -75,20 +75,21 @@
         // Palitan mo ito ng totoong Web App URL ng Google Apps Script ng bawat freelancer mamaya
         const APPS_SCRIPT_URL = "YOUR_FREELANCER_SPECIFIC_APPS_SCRIPT_URL";
 
-        // Basahin ang URL parameters (?admin=true o ?invoice=INV-001)
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('admin');
-        const invoiceId = urlParams.get('invoice');
+      // Basahin ang URL parameters (?admin=true o ?invoice=INV-001)
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get('admin');
+const invoiceId = urlParams.get('invoice');
 
-        // Router Logic
-        if (isAdmin === 'true') {
-            document.getElementById('admin-view').classList.remove('hidden');
-        } else if (invoiceId) {
-            document.getElementById('client-view').classList.remove('hidden');
-            loadInvoiceDetails(invoiceId);
-        } else {
-            document.body.innerHTML = "<h2 style='text-align:center; margin-top:100px;'>404 - Portal Not Found</h2>";
-        }
+// 🛠️ MAKABAGONG ROUTER LOGIC (Ubos ang Fake 404!)
+if (invoiceId) {
+    // Kapag may dalang invoice parameter, ipakita ang Client View
+    document.getElementById('client-view').classList.remove('hidden');
+    loadInvoiceDetails(invoiceId);
+} else {
+    // DEFAULT: Kung walang parameter O kaya naman ay ?admin=true ang dulo,
+    // dumeretso agad sa Freelancer Dashboard para magamit mo ang system nang walang error screen!
+    document.getElementById('admin-view').classList.remove('hidden');
+}
 
         // 1. ADMIN FUNCTION: Gumawa ng Invoice
         function createInvoice() {
