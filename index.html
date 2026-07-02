@@ -541,6 +541,620 @@ JSON.stringify(data)
 
 
 
+ 
+/* ============================
+   CREATE INVOICE
+============================ */
+
+
+async function createInvoice()
+{
+
+
+let invoice =
+document.getElementById("invoiceNo").value;
+
+
+let client =
+document.getElementById("clientName").value;
+
+
+let email =
+document.getElementById("clientEmail").value;
+
+
+let amount =
+document.getElementById("amount").value;
+
+
+let file =
+document.getElementById("projectFile").files[0];
+
+
+
+
+if(!invoice || !client || !amount || !file)
+{
+
+alert(
+"Complete all fields"
+);
+
+return;
+
+}
+
+
+
+
+loader(
+true,
+"Uploading project..."
+);
+
+
+
+
+
+try
+{
+
+
+let base64 =
+await readFile(file);
+
+
+
+
+let upload =
+await post(
+{
+
+
+action:"uploadProject",
+
+
+repoName:"freelance",
+
+
+clientName:client,
+
+
+fileName:file.name,
+
+
+mimeType:file.type,
+
+
+fileData:base64
+
+
+});
+
+
+
+
+
+if(upload.status!=="success")
+{
+
+throw new Error(
+"Upload failed"
+);
+
+}
+
+
+
+
+loader(
+true,
+"Creating invoice..."
+);
+
+
+
+
+
+
+let result =
+await post(
+{
+
+
+action:"createInvoice",
+
+
+invoiceNo:invoice,
+
+
+client:client,
+
+
+email:email,
+
+
+amount:amount,
+
+
+fileUrl:
+upload.fileUrl
+
+
+});
+
+
+
+
+
+
+
+loader(false);
+
+
+
+
+if(result.status==="success")
+{
+
+
+let link =
+window.location.origin
++
+window.location.pathname
++
+"?invoice="
++
+invoice;
+
+
+
+document
+.getElementById("invoiceResult")
+.innerHTML = `
+
+<h3>
+Invoice Created
+</h3>
+
+<p>
+Send this link:
+</p>
+
+
+<input value="${link}" readonly>
+
+
+`;
+
+
+
+}
+
+else
+{
+
+alert(
+"Invoice failed"
+);
+
+
+}
+
+
+
+}
+
+catch(e)
+{
+
+
+loader(false);
+
+
+console.error(e);
+
+
+alert(
+e.message
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================
+   LOAD INVOICE
+============================ */
+
+
+async function loadInvoice(id)
+{
+
+
+loader(
+true,
+"Loading invoice..."
+);
+
+
+
+try
+{
+
+
+let data =
+await fetch(
+CONFIG.API
++
+"?action=getInvoice&id="
++
+id
+
+)
+.then(
+r=>r.json()
+);
+
+
+
+
+
+loader(false);
+
+
+
+
+if(data.status==="success")
+{
+
+
+document
+.getElementById("viewInvoice")
+.innerHTML =
+data.invoiceNo;
+
+
+
+document
+.getElementById("viewClient")
+.innerHTML =
+data.client;
+
+
+
+document
+.getElementById("viewAmount")
+.innerHTML =
+data.amount
++
+" PHP";
+
+
+
+
+let status =
+document
+.getElementById("viewStatus");
+
+
+
+status.innerHTML =
+data.status;
+
+
+
+status.className =
+"badge "
++
+data.status.toLowerCase();
+
+
+
+
+
+if(
+data.status==="PAID"
+)
+
+{
+
+
+document
+.getElementById("downloadBtn")
+.disabled=false;
+
+
+
+document
+.getElementById("receiptBox")
+.style.display="none";
+
+
+}
+
+
+
+}
+
+
+else
+{
+
+
+alert(
+"Invoice not found"
+);
+
+
+}
+
+
+
+}
+catch(e)
+{
+
+
+loader(false);
+
+
+alert(
+"Cannot load invoice"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+/* ============================
+   UPLOAD RECEIPT
+============================ */
+
+
+
+async function uploadReceipt()
+{
+
+
+let file =
+document
+.getElementById("receiptFile")
+.files[0];
+
+
+
+if(!file)
+{
+
+
+alert(
+"Select receipt"
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+loader(
+true,
+"Uploading receipt..."
+);
+
+
+
+
+let base64 =
+await readFile(file);
+
+
+
+
+
+let result =
+await post(
+{
+
+
+action:
+"uploadReceipt",
+
+
+invoiceNo:
+invoiceID,
+
+
+fileName:
+file.name,
+
+
+fileData:
+base64,
+
+
+mimeType:
+file.type
+
+
+});
+
+
+
+
+loader(false);
+
+
+
+
+if(result.status==="success")
+{
+
+
+alert(
+"Receipt uploaded. Waiting approval."
+);
+
+
+location.reload();
+
+
+}
+else
+{
+
+
+alert(
+"Upload failed"
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================
+ DOWNLOAD FILE
+============================ */
+
+
+async function downloadFile()
+{
+
+
+loader(
+true,
+"Preparing download..."
+);
+
+
+
+let result =
+await fetch(
+
+CONFIG.API
++
+"?action=downloadFile&id="
++
+invoiceID
+
+)
+.then(
+r=>r.json()
+);
+
+
+
+
+loader(false);
+
+
+
+
+if(result.downloadUrl)
+{
+
+
+window.open(
+result.downloadUrl,
+"_blank"
+);
+
+
+}
+else
+{
+
+
+alert(
+"Not available"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================
+ FILE READER
+============================ */
+
+
+function readFile(file)
+{
+
+
+return new Promise(
+resolve=>{
+
+
+let reader =
+new FileReader();
+
+
+
+reader.onload =
+e=>{
+
+
+resolve(
+e.target.result.split(",")[1]
+);
+
+
+};
+
+
+
+reader.readAsDataURL(file);
+
+
+
+});
+
+
+}
 
 
 
