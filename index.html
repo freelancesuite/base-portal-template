@@ -1,241 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreelanceSuite - Portal</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { color: #2c3e50; margin-top: 0; }
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background 0.2s; }
-        .btn:hover { background-color: #2980b9; }
-        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        .hidden { display: none; }
-        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
-        .unpaid { background-color: #f1c40f; color: #fff; }
-        .pending { background-color: #e67e22; color: #fff; }
-        .paid { background-color: #2ecc71; color: #fff; }
-    </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FreelanceSuite Portal</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
+
+
 <body>
 
-    <div id="admin-view" class="container hidden">
-        <h2>🚀 Freelancer Dashboard</h2>
-        <p>Gumawa ng bagong invoice para sa iyong client.</p>
-        <hr><br>
-        <div class="form-group">
-            <label>Invoice ID:</label>
-            <input type="text" id="inv-id" placeholder="e.g., INV-2026-001">
-        </div>
-        <div class="form-group">
-        <label>Client Name:</label>
-                <input type="text" id="upload-client" placeholder="Pangalan ng Client">
-            </div>
-        <div class="form-group">
-            <label>Amount (PHP):</label>
-            <input type="number" id="inv-amount" placeholder="0.00">
-        </div>
-       <div class="form-group">
-            <label>Upload File:</label>
-            <input type="file" id="work-file">
-        </div>
-        <button class="btn" style="background-color: #27ae60;" onclick="handleFileUpload()">🚀 Upload to Drive</button>
-              
-    </div>
 
-    <div id="client-view" class="container hidden">
-        <h2>💼 Client Payment Portal</h2>
-        <p>Project Invoice details and secured file delivery.</p>
-        <hr><br>
-        <table style="width:100%; margin-bottom: 20px; text-align: left;">
-            <tr><th>Invoice ID:</th><td id="display-id">-</td></tr>
-            <tr><th>Client Name:</th><td id="display-client">-</td></tr>
-            <tr><th>Amount Due:</th><td id="display-amount">0.00 PHP</td></tr>
-            <tr><th>Status:</th><td><span id="display-status" class="status-badge unpaid">Unpaid</span></td></tr>
-        </table>
+<!-- =========================
+     LOADER
+========================= -->
 
-        <div id="upload-section">
-            <p style="font-size: 14px; color: #7f8c8d;">Paki-upload ang screenshot ng iyong GCash/Bank transfer proof of payment para ma-unlock ang files:</p>
-            <div class="form-group">
-                <input type="file" id="receipt-file" accept="image/*">
-            </div>
-            <button class="btn" onclick="submitReceipt()">Submit Proof of Payment</button>
-        </div>
+<div id="loader" class="loader hidden">
 
-        <br>
-        <button class="btn paid" id="download-btn" onclick="downloadDeliverable()" disabled>
-            🎁 Download Project Files (.zip)
-        </button>
-    </div>
+    <div class="spinner"></div>
 
-    <script>
-        // Palitan mo ito ng totoong Web App URL ng Google Apps Script ng bawat freelancer mamaya
-        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmNAEO5TAqMQEMd6nYrpANeuhVk1Y32VKRWg92GU65RkZj2dmWtpT33i8RoCUc6WXuvQ/exec";
+    <h3 id="loaderText">
+        Loading...
+    </h3>
 
-      // Basahin ang URL parameters (?admin=true o ?invoice=INV-001)
-const urlParams = new URLSearchParams(window.location.search);
-const isAdmin = urlParams.get('admin');
-const invoiceId = urlParams.get('invoice');
+</div>
 
-// 🛠️ MAKABAGONG ROUTER LOGIC (Ubos ang Fake 404!)
-if (invoiceId) {
-    // Kapag may dalang invoice parameter, ipakita ang Client View
-    document.getElementById('client-view').classList.remove('hidden');
-    loadInvoiceDetails(invoiceId);
-} else {
-    // DEFAULT: Kung walang parameter O kaya naman ay ?admin=true ang dulo,
-    // dumeretso agad sa Freelancer Dashboard para magamit mo ang system nang walang error screen!
-    document.getElementById('admin-view').classList.remove('hidden');
+
+
+
+<!-- =========================
+     MAIN CONTAINER
+========================= -->
+
+<div class="container">
+
+
+<!-- =========================
+     ADMIN VIEW
+========================= -->
+
+
+<section id="adminView" class="card hidden">
+
+
+<h2>
+🚀 Freelancer Dashboard
+</h2>
+
+
+<p>
+Create invoice and upload project files.
+</p>
+
+
+
+<div class="form-group">
+
+<label>
+Invoice Number
+</label>
+
+<input 
+id="invoiceNo"
+placeholder="INV-2026-001">
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<label>
+Client Name
+</label>
+
+<input 
+id="clientName"
+placeholder="Client name">
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<label>
+Client Email
+</label>
+
+<input 
+id="clientEmail"
+placeholder="email">
+
+</div>
+
+
+
+
+
+<div class="form-group">
+
+<label>
+Amount
+</label>
+
+<input 
+type="number"
+id="amount"
+placeholder="0.00">
+
+</div>
+
+
+
+
+<div class="form-group">
+
+<label>
+Upload Deliverable
+</label>
+
+
+<input 
+type="file"
+id="projectFile">
+
+
+</div>
+
+
+
+
+
+<button 
+class="btn primary"
+onclick="createInvoice()">
+
+Create Invoice
+
+</button>
+
+
+
+
+<div 
+id="invoiceResult"
+class="result">
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- =========================
+     CLIENT VIEW
+========================= -->
+
+
+<section id="clientView" class="card hidden">
+
+
+<h2>
+💼 Client Payment Portal
+</h2>
+
+
+<p>
+Secure invoice and file delivery
+</p>
+
+
+
+
+<hr>
+
+
+
+
+<div class="invoice-box">
+
+
+<table>
+
+
+<tr>
+<th>Invoice</th>
+<td id="viewInvoice">
+-
+</td>
+</tr>
+
+
+
+<tr>
+<th>
+Client
+</th>
+
+<td id="viewClient">
+-
+</td>
+
+</tr>
+
+
+
+
+<tr>
+
+<th>
+Amount
+</th>
+
+<td id="viewAmount">
+0
+</td>
+
+</tr>
+
+
+
+
+<tr>
+
+<th>
+Status
+</th>
+
+<td>
+
+<span 
+id="viewStatus"
+class="badge unpaid">
+
+Unpaid
+
+</span>
+
+</td>
+
+</tr>
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+<div 
+id="receiptBox">
+
+
+<h3>
+Upload Payment Receipt
+</h3>
+
+
+
+<input 
+type="file"
+id="receiptFile"
+accept="image/*">
+
+
+
+<button
+class="btn"
+onclick="uploadReceipt()">
+
+Submit Receipt
+
+</button>
+
+
+</div>
+
+
+
+
+
+<button
+
+id="downloadBtn"
+
+class="btn success"
+
+disabled
+
+onclick="downloadFile()">
+
+
+Download Files
+
+
+</button>
+
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+/* ============================
+CONFIG
+============================ */
+
+
+const CONFIG = {
+
+
+API:
+"https://script.google.com/macros/s/AKfycbwmNAEO5TAqMQEMd6nYrpANeuhVk1Y32VKRWg92GU65RkZj2dmWtpT33i8RoCUc6WXuvQ/exec"
+
+
+};
+
+
+
+
+
+
+/* ============================
+GLOBAL
+============================ */
+
+
+let invoiceID = "";
+
+
+
+
+
+
+
+/* ============================
+ROUTER
+============================ */
+
+
+
+window.onload = ()=>{
+
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+
+
+invoiceID =
+params.get("invoice");
+
+
+
+let admin =
+params.get("admin");
+
+
+
+
+
+if(invoiceID)
+{
+
+
+showClient();
+
+
+loadInvoice(
+invoiceID
+);
+
+
 }
 
-    function handleFileUpload() {
-    const clientInput = document.getElementById('upload-client');
-    
-    // Safety check: I-check kung null ba talaga
-    if (!clientInput) {
-        alert("Error: Hindi mahanap ang Client Name field! Paki-refresh ang page.");
-        return;
-    }
-    
-    const clientName = clientInput.value; // Dito na siya kukuha
-    const fileInput = document.getElementById('work-file');
-    const repoName = "vergeltest4";
+else
+{
 
-    if (!clientName || fileInput.files.length === 0) {
-        alert("Punan ang client name at pumili ng file!");
-        return;
-    }
 
-    const file = fileInput.files[0];
-    const reader = new FileReader();
+showAdmin();
 
-    reader.onload = function(e) {
-        const base64 = e.target.result.split(',')[1];
-        alert("Nag-uupload na... antayin ang confirmation.");
 
-        fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                repoName: repoName,
-                clientName: clientName,
-                fileName: file.name,
-                fileData: base64,
-                mimeType: file.type
-            })
-        })
-        // Sa loob ng handleFileUpload (yung .then part)
-            .then(data => {
-                if(data.status === "success") {
-                    alert("Boom! Success: " + data.msg);
-                } else {
-                    alert("Server Error: " + data.message);
-                }
-            })
-        .catch(err => {
-            console.error(err);
-            alert("Error: " + err);
-        });
-    };
-    reader.readAsDataURL(file);
 }
-        // 1. ADMIN FUNCTION: Gumawa ng Invoice
-        function createInvoice() {
-            const id = document.getElementById('inv-id').value;
-            const client = document.getElementById('inv-client').value;
-            const amount = document.getElementById('inv-amount').value;
-            const fileLink = document.getElementById('inv-file').value;
 
-            if(!id || !client || !amount || !fileLink) return alert("Paki-puno lahat ng fields!");
 
-            fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // Para sa Apps Script cross-origin
-                body: JSON.stringify({
-                    action: 'createInvoice',
-                    id: id,
-                    client: client,
-                    amount: amount,
-                    fileLink: fileLink
-                })
-            }).then(() => {
-                alert("Invoice Successfully Generated sa Google Sheet! Pwede mo na isend ang link sa client.");
-                // Mag-ge-generate ng client link para makopya ni freelancer
-                const clientLink = window.location.origin + window.location.pathname + "?invoice=" + id;
-                prompt("Kopyahin ang link na ito at isend kay client:", clientLink);
-            });
-        }
 
-        // 2. CLIENT FUNCTION: I-load ang Invoice Data mula sa Google Sheet
-        function loadInvoiceDetails(id) {
-            fetch(`${APPS_SCRIPT_URL}?action=getInvoice&id=${id}`)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.error) {
-                        alert("Invoice not found!");
-                        return;
-                    }
-                    document.getElementById('display-id').innerText = data.id;
-                    document.getElementById('display-client').innerText = data.client;
-                    document.getElementById('display-amount').innerText = data.amount + " PHP";
-                    
-                    const statusEl = document.getElementById('display-status');
-                    statusEl.innerText = data.status;
-                    statusEl.className = "status-badge " + data.status.toLowerCase().replace(" ", "-");
+};
 
-                    // Kung PAID na, i-enable ang download button at itago ang upload section
-                    if(data.status.toUpperCase() === "PAID") {
-                        document.getElementById('download-btn').disabled = false;
-                        document.getElementById('upload-section').classList.add('hidden');
-                    }
-                });
-        }
 
-        // 3. CLIENT FUNCTION: Mag-upload ng Resibo
-        function submitReceipt() {
-            const fileInput = document.getElementById('receipt-file');
-            if(fileInput.files.length === 0) return alert("Pili muna ng larawan ng resibo!");
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Data = e.target.result.split(',')[1];
-                
-                fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        action: 'uploadReceipt',
-                        id: invoiceId,
-                        fileName: file.name,
-                        fileData: base64Data
-                    })
-                }).then(() => {
-                    alert("Resibo na-upload na! Pakihintay na i-verify ng freelancer para ma-unlock ang file.");
-                    location.reload();
-                });
-            };
-            reader.readAsDataURL(file);
-        }
 
-        // 4. CLIENT FUNCTION: I-download ang file kung Paid na
-        function downloadDeliverable() {
-            // Humingi ng secure download link sa Google Apps Script
-            fetch(`${APPS_SCRIPT_URL}?action=downloadFile&id=${invoiceId}`)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.downloadUrl) {
-                        window.open(data.downloadUrl, '_blank');
-                    } else {
-                        alert("Hindi pa aprubado ang iyong bayad.");
-                    }
-                });
-        }
-    </script>
+
+
+
+function showAdmin()
+{
+
+
+document
+.getElementById("adminView")
+.classList.remove("hidden");
+
+
+}
+
+
+
+
+
+function showClient()
+{
+
+
+document
+.getElementById("clientView")
+.classList.remove("hidden");
+
+
+}
+
+
+
+
+
+
+
+
+/* ============================
+HELPERS
+============================ */
+
+
+
+function loader(show,text="Loading...")
+{
+
+
+let box =
+document.getElementById("loader");
+
+
+let label =
+document.getElementById("loaderText");
+
+
+
+label.innerHTML=text;
+
+
+
+if(show)
+
+box.classList.remove("hidden");
+
+
+else
+
+box.classList.add("hidden");
+
+
+}
+
+
+
+
+
+
+
+function post(data)
+{
+
+
+return fetch(
+CONFIG.API,
+{
+
+
+method:"POST",
+
+headers:
+{
+
+"Content-Type":
+"application/json"
+
+},
+
+
+body:
+JSON.stringify(data)
+
+
+})
+.then(r=>r.json());
+
+
+}
+
+
+
+
+
+
+
+
+</script>
+
+
 </body>
+
 </html>
