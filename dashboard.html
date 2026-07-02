@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreelanceSuite Dashboard</title>
+
+    <link rel="stylesheet" href="dashboard.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ==========================================
+ LOADER
+=========================================== -->
+
+<div id="loader" class="loader hidden">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+</div>
+
+<!-- ==========================================
+ SIDEBAR
+=========================================== -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+
+        <i class="fa-solid fa-layer-group"></i>
+
+        <span>FreelanceSuite</span>
+
+    </div>
+
+    <ul class="menu">
+
+        <li class="active" data-page="dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+        </li>
+
+        <li data-page="clients">
+            <i class="fa-solid fa-users"></i>
+            <span>Clients</span>
+        </li>
+
+        <li data-page="projects">
+            <i class="fa-solid fa-folder-open"></i>
+            <span>Projects</span>
+        </li>
+
+        <li data-page="invoices">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Invoices</span>
+        </li>
+
+        <li data-page="payments">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Payments</span>
+        </li>
+
+        <li data-page="files">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span>Files</span>
+        </li>
+
+        <li data-page="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </li>
+
+    </ul>
+
+</aside>
+
+<!-- ==========================================
+ MAIN
+=========================================== -->
+
+<div class="main">
+
+    <!-- =============================
+         TOPBAR
+    ============================== -->
+
+    <header class="topbar">
+
+        <div class="top-left">
+
+            <button id="menuToggle">
+
+                <i class="fa-solid fa-bars"></i>
+
+            </button>
+
+            <h2 id="pageTitle">
+
+                Dashboard
+
+            </h2>
+
+        </div>
+
+        <div class="top-right">
+
+            <button class="icon-btn">
+
+                <i class="fa-solid fa-bell"></i>
+
+            </button>
+
+            <div class="profile">
+
+                <img src="https://ui-avatars.com/api/?name=Freelancer&background=2563eb&color=fff">
+
+                <div>
+
+                    <strong id="businessName">
+                        Freelancer
+                    </strong>
+
+                    <small>
+                        Premium
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- =============================
+         CONTENT
+    ============================== -->
+
+    <main class="content">
+
+        <!-- =====================================
+             DASHBOARD PAGE
+        ====================================== -->
+
+        <section
+            id="dashboardPage"
+            class="page active-page">
+
+            <div class="welcome">
+
+                <h1>
+
+                    Welcome Back 👋
+
+                </h1>
+
+                <p>
+
+                    Here's what's happening in your business today.
+
+                </p>
+
+            </div>
+
+            <!-- ===========================
+                 STATS
+            ============================ -->
+
+            <div class="stats-grid">
+
+                <div class="card">
+
+                    <div class="card-icon blue">
+
+                        <i class="fa-solid fa-peso-sign"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+
+                            Revenue
+
+                        </h3>
+
+                        <h2 id="totalRevenue">
+
+                            ₱0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-icon orange">
+
+                        <i class="fa-solid fa-wallet"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+
+                            Pending
+
+                        </h3>
+
+                        <h2 id="pendingRevenue">
+
+                            ₱0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-icon green">
+
+                        <i class="fa-solid fa-users"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+
+                            Clients
+
+                        </h3>
+
+                        <h2 id="totalClients">
+
+                            0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="card">
+
+                    <div class="card-icon purple">
+
+                        <i class="fa-solid fa-folder"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>
+
+                            Projects
+
+                        </h3>
+
+                        <h2 id="totalProjects">
+
+                            0
+
+                        </h2>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ===========================
+                 DASHBOARD GRID
+            ============================ -->
+
+            <div class="dashboard-grid">
+
+                <!-- LEFT -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3>
+
+                            Recent Invoices
+
+                        </h3>
+
+                        <button class="primary-btn">
+
+                            + New Invoice
+
+                        </button>
+
+                    </div>
+
+                    <table>
+
+                        <thead>
+
+                        <tr>
+
+                            <th>Invoice</th>
+
+                            <th>Client</th>
+
+                            <th>Amount</th>
+
+                            <th>Status</th>
+
+                        </tr>
+
+                        </thead>
+
+                        <tbody id="recentInvoiceTable">
+
+                        <tr>
+
+                            <td colspan="4">
+
+                                No invoices yet.
+
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- RIGHT -->
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <h3>
+
+                            Recent Activity
+
+                        </h3>
+
+                    </div>
+
+                    <div
+                        id="activityList"
+                        class="activity-list">
+
+                        <div class="activity-item">
+
+                            <i class="fa-solid fa-circle-info"></i>
+
+                            <div>
+
+                                <strong>
+
+                                    Welcome to FreelanceSuite
+
+                                </strong>
+
+                                <small>
+
+                                    Your activity will appear here.
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+                <!-- =====================================
+             CLIENTS PAGE
+        ====================================== -->
+
+        <section
+            id="clientsPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Clients
+
+                    </h1>
+
+                    <p>
+
+                        Manage all your clients.
+
+                    </p>
+
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="btnAddClient">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Add Client
+
+                </button>
+
+            </div>
+
+            <div class="panel">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Client</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Projects</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="clientTable">
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                No clients found.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+
+
+        <!-- =====================================
+             PROJECTS PAGE
+        ====================================== -->
+
+        <section
+            id="projectsPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Projects
+
+                    </h1>
+
+                    <p>
+
+                        Track your ongoing projects.
+
+                    </p>
+
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="btnAddProject">
+
+                    <i class="fa-solid fa-folder-plus"></i>
+
+                    New Project
+
+                </button>
+
+            </div>
+
+            <div class="panel">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Project</th>
+
+                            <th>Client</th>
+
+                            <th>Budget</th>
+
+                            <th>Status</th>
+
+                            <th>Deadline</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="projectTable">
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                No projects available.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+                <!-- =====================================
+             INVOICES PAGE
+        ====================================== -->
+
+        <section
+            id="invoicesPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Invoices
+
+                    </h1>
+
+                    <p>
+
+                        Create and manage invoices.
+
+                    </p>
+
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="btnCreateInvoice">
+
+                    <i class="fa-solid fa-file-circle-plus"></i>
+
+                    Create Invoice
+
+                </button>
+
+            </div>
+
+            <div class="panel">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Invoice No.</th>
+                            <th>Client</th>
+                            <th>Project</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="invoiceTable">
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                No invoices found.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+
+
+        <!-- =====================================
+             PAYMENTS PAGE
+        ====================================== -->
+
+        <section
+            id="paymentsPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Payments
+
+                    </h1>
+
+                    <p>
+
+                        Review and approve client payments.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Invoice</th>
+                            <th>Client</th>
+                            <th>Amount</th>
+                            <th>Receipt</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="paymentTable">
+
+                        <tr>
+
+                            <td colspan="6">
+
+                                No payment records.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+                <!-- =====================================
+             FILES PAGE
+        ====================================== -->
+
+        <section
+            id="filesPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Files
+
+                    </h1>
+
+                    <p>
+
+                        Manage uploaded project files.
+
+                    </p>
+
+                </div>
+
+                <button
+                    class="primary-btn"
+                    id="btnUploadFile">
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                    Upload File
+
+                </button>
+
+            </div>
+
+            <div class="panel">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Client</th>
+                            <th>Project</th>
+                            <th>Filename</th>
+                            <th>Uploaded</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="fileTable">
+
+                        <tr>
+
+                            <td colspan="5">
+
+                                No uploaded files.
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+
+
+        <!-- =====================================
+             SETTINGS PAGE
+        ====================================== -->
+
+        <section
+            id="settingsPage"
+            class="page">
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+
+                        Settings
+
+                    </h1>
+
+                    <p>
+
+                        Configure your business information.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="panel">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Business Name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="businessInput"
+                            placeholder="Your Business Name">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Email
+
+                        </label>
+
+                        <input
+                            type="email"
+                            id="businessEmail">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Phone Number
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="businessPhone">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            GCash Number
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="gcashNumber">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Bank Name
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="bankName">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Bank Account
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="bankAccount">
+
+                    </div>
+
+                </div>
+
+                <br>
+
+                <button
+                    class="primary-btn"
+                    id="btnSaveSettings">
+
+                    <i class="fa-solid fa-floppy-disk"></i>
+
+                    Save Settings
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- ==========================================
+ MODAL
+=========================================== -->
+
+<div
+    id="modalOverlay"
+    class="modal-overlay hidden">
+
+    <div
+        class="modal-window">
+
+        <div
+            id="modalContent">
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================
+ TOAST
+=========================================== -->
+
+<div
+    id="toastContainer">
+
+</div>
+
+<!-- ==========================================
+ JAVASCRIPT
+=========================================== -->
+
+<script src="dashboard.js"></script>
+
+</body>
+</html>
